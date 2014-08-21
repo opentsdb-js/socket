@@ -62,6 +62,15 @@ Creates a TCP socket connection.
 socket.connect();
 ```
 
+#### socket.status()
+
+Returns the current connection status. If a socket connection exists, returns `true`. If no socket connection exists, returns `false`. 
+
+``` javascript
+socket.status();
+```
+
+
 #### socket.strict( [bool] )
 
 This method is a setter/getter. If no boolean `flag` is provided, the method returns the strict setting. By default, the socket enforces strict type checking on socket writes. To turn off strict mode,
@@ -92,6 +101,63 @@ socket.write( value, function ack() {
 });
 ```
 
+#### socket.end()
+
+Closes a socket connection. To close a socket,
+
+``` javascript
+socket.end();
+```
+
+
+### Events
+
+The socket is an event-emitter and emits the following events...
+
+#### 'connect'
+
+The socket emits a `connect` event upon successfully establishing a socket connection. To register a listener,
+
+``` javascript
+socket.addListener( 'connect', function onConnect() {
+	console.log( '...connected...' );
+});
+```
+
+#### 'error'
+
+The socket emits an `error` event upon encountering an error. To register a listener,
+
+``` javascript
+socket.addListener( 'error', function onError( error ) {
+	console.error( error.message );
+	console.error( error.stack );
+});
+```
+
+#### 'close'
+
+The socket emits a `close` event when the other end of the connection closes the socket. To register a listener,
+
+``` javascript
+socket.addListener( 'close', function onClose() {
+	console.log( '...socket closed...' );
+	console.log( '...attempting to reconnect in 5 seconds...' );
+	setTimeout( function reconnect() {
+		socket.connect();
+	}, 5000 );
+});
+```
+
+#### 'warn'
+
+The socket emits a `warn` event when attempting to create a new socket connection when a connection already exists. To register a listener,
+
+``` javascript
+socket.addListener( 'warn', function onWarn( message ) {
+	console.warn( message );
+});
+```
 
 
 ---
@@ -105,7 +171,79 @@ var createSocket = require( 'opentsdb-socket' ),
 
 socket
 	.host( '192.168.92.111' )
-	.port( 8080 );
+	.port( 8080 )
+	.strict( false )
+	.connect();
+```
+
+---
+## Examples
+
+``` javascript
+var createSocket = require( 'opentsdb-socket' ),
+	socket = createSocket();
+
+socket
+	.host( '192.168.92.111' )
+	.port( 4243 )
+	.strict( false );
+
+socket.on( 'error', onError );
+socket.on( 'close', onClose );
+socket.on( 'connect', onConnect );
+
+connect();
+
+function connect() {
+	socket.connect();
+}
+
+function onError( error ) {
+	console.error( error.message );
+	console.error( error.stack );
+}
+
+function onClose() {
+	console.log( '...attempting to reconnect in 2 seconds...' );
+	setTimeout( function reconnect() {
+		connect();
+	}, 2000 );
+}
+
+function onConnect() {
+	for ( var i = 0; i < 100; i++ ) {
+		write( i );
+	}
+}
+
+function write( idx ) {
+	setTimeout( function onTimeout() {
+		if ( socket.status() ) {
+			socket.write( newLine(), onWrite );
+		}
+	}, 1000*idx );
+}
+
+function newLine() {
+	var metric = 'cpu.utilization',
+		timestamp = Date.now(),
+		value = Math.random(),
+		line = '';
+
+	line += 'put ';
+	line += metric + ' ';
+	line += timestamp + ' ';
+	line += value + ' ';
+	line += 'beep=boop ';
+	line += 'foo=bar';
+	line += '\n';
+
+	return line;
+}
+
+function onWrite() {
+	console.log( '...data written to socket...' );
+}
 ```
 
 

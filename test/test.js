@@ -88,6 +88,24 @@ describe( 'lib/socket', function tests() {
 			}
 		});
 
+		it( 'should not allow an invalid host', function test() {
+			var socket = createSocket(),
+				values = [
+					'badhost',
+					'1000.10.10.100'
+				];
+
+			for ( var i = 0; i < values.length; i++ ) {
+				expect( badValue( values[i] ) ).to.throw( Error );
+			}
+
+			function badValue( value ) {
+				return function() {
+					socket.host( value );
+				};
+			}
+		});
+
 		it( 'should set the host', function test() {
 			var socket = createSocket();
 			socket.host( '192.168.1.172' );
@@ -159,7 +177,74 @@ describe( 'lib/socket', function tests() {
 				.connect();
 		});
 
+		it( 'should not override an existing connection (one connection per socket instance)', function test( done ) {
+			var socket = createSocket();
+
+			// Configure the socket:
+			socket.on( 'connect', onConnect );
+			socket.on( 'warn', onWarn );
+
+			// Create a client socket connection:
+			socket
+				.host( ADDRESS.address )
+				.port( ADDRESS.port )
+				.connect();
+
+			function onConnect() {
+				socket.connect();
+			}
+
+			function onWarn( msg ) {
+				assert.ok( true );
+				socket.end();
+				done();
+			}
+		});
+
 	}); // end TESTS connect()
+
+	describe( 'status', function tests() {
+
+		it( 'should provide a method to determine the current connection status', function test() {
+			var socket = createSocket();
+			expect( socket.status ).to.be.a( 'function' );
+		});
+
+		it( 'should indicate when no socket connection exists', function test( done ) {
+			var socket = createSocket();
+			assert.notOk( socket.status() );
+
+			socket
+				.host( ADDRESS.address )
+				.port( ADDRESS.port )
+				.connect();
+
+			socket.on( 'connect', function onConnect() {
+				socket.end();
+			});
+
+			socket.on( 'close', function onClose() {
+				assert.notOk( socket.status() );
+				done();
+			});
+		});
+
+		it( 'should indicate when a socket connection exists', function test( done ) {
+			var socket = createSocket();
+			
+			socket
+				.host( ADDRESS.address )
+				.port( ADDRESS.port )
+				.connect();
+
+			socket.on( 'connect', function onConnect() {
+				assert.ok( socket.status() );
+				socket.end();
+				done();
+			});
+		});
+
+	});
 
 	describe( 'strict', function tests() {
 
