@@ -54,6 +54,43 @@ This method is a setter/getter. If no `port` is provided, the method returns the
 socket.port( 8080 );
 ```
 
+#### socket.connect()
+
+Creates a TCP socket connection.
+
+``` javascript
+socket.connect();
+```
+
+#### socket.strict( [bool] )
+
+This method is a setter/getter. If no boolean `flag` is provided, the method returns the strict setting. By default, the socket enforces strict type checking on socket writes. To turn off strict mode,
+
+``` javascript
+socket.strict( false );
+```
+
+Turn off strict mode when you are certain that arguments provided to the `socket.write()` method are of the proper type.
+
+
+#### socket.write( string[, clbk] )
+
+Writes to the socket connection. If strict mode is `off`, no type checking of input arguments occurs. An optional callback is invoked after writing all data to the socket. To write to the socket,
+
+``` javascript
+var value = '';
+
+value += 'put ';
+value += 'cpu.utilization ';
+value += Date.now() + ' ';
+value += Math.random() + ' ';
+value += 'beep=boop ';
+value += 'foo=bar\n';
+
+socket.write( value, function ack() {
+	console.log( '...data written...' );
+});
+```
 
 
 

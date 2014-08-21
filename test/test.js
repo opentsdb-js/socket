@@ -380,7 +380,6 @@ describe( 'lib/socket', function tests() {
 				.connect();
 
 			function onFinish() {
-				console.log( arguments );
 				assert.ok( true );
 				socket.end();
 				done();
