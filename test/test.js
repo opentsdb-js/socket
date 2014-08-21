@@ -78,7 +78,7 @@ describe( 'lib/socket', function tests() {
 				];
 
 			for ( var i = 0; i < values.length; i++ ) {
-				expect( badValue( values[i] ) ).to.throw( Error );
+				expect( badValue( values[i] ) ).to.throw( TypeError );
 			}
 
 			function badValue( value ) {
@@ -117,7 +117,7 @@ describe( 'lib/socket', function tests() {
 				];
 
 			for ( var i = 0; i < values.length; i++ ) {
-				expect( badValue( values[i] ) ).to.throw( Error );
+				expect( badValue( values[i] ) ).to.throw( TypeError );
 			}
 
 			function badValue( value ) {
@@ -161,11 +161,176 @@ describe( 'lib/socket', function tests() {
 
 	}); // end TESTS connect()
 
+	describe( 'strict', function tests() {
+
+		it( 'should provide a method to set/get a type checking level when writing to the socket stream', function test() {
+			var socket = createSocket();
+			expect( socket.strict ).to.be.a( 'function' );
+		});
+
+		it( 'should not allow a non-boolean flag', function test() {
+			var socket = createSocket(),
+				values = [
+					'5',
+					[],
+					{},
+					5,
+					null,
+					undefined,
+					NaN,
+					function(){}
+				];
+
+			for ( var i = 0; i < values.length; i++ ) {
+				expect( badValue( values[i] ) ).to.throw( TypeError );
+			}
+
+			function badValue( value ) {
+				return function() {
+					socket.strict( value );
+				};
+			}
+		});
+
+		it( 'should set a type checking flag', function test() {
+			var socket = createSocket();
+			socket.strict( false );
+			assert.strictEqual( socket.strict(), false );
+		});
+
+	});
+
 	describe( 'write', function tests() {
 
 		it( 'should provide a method to write to the socket stream', function test() {
 			var socket = createSocket();
 			expect( socket.write ).to.be.a( 'function' );
+		});
+
+		it( 'should throw an error if no connection has been established when in strict mode', function test() {
+			var socket = createSocket();
+
+			socket.strict( true );
+
+			expect( foo ).to.throw( Error );
+
+			function foo() {
+				socket.write( 'beep' );
+			}
+		});
+
+		it( 'should not allow a non-string to be written to the socket when in strict mode', function test( done ) {
+			var socket = createSocket(),
+				values = [
+					5,
+					[],
+					{},
+					true,
+					null,
+					undefined,
+					NaN,
+					function(){}
+				];
+
+			// Configure the socket:
+			socket.on( 'connect', function onConnect() {
+				for ( var i = 0; i < values.length; i++ ) {
+					expect( badValues( values[i] ) ).to.throw( TypeError );
+				}
+				socket.end();
+				done();
+			});
+
+			// Create a client socket connection:
+			socket
+				.host( ADDRESS.address )
+				.port( ADDRESS.port )
+				.strict( true )
+				.connect();
+
+			function badValues( value ) {
+				return function() {
+					socket.write( value, function(){} );
+				};
+			}
+		});
+
+		it( 'should ensure the callback is a function when in strict mode', function test( done ) {
+			var socket = createSocket(),
+				values = [
+					5,
+					[],
+					{},
+					true,
+					null,
+					undefined,
+					NaN,
+					'5'
+				];
+
+			// Configure the socket:
+			socket.on( 'connect', function onConnect() {
+				for ( var i = 0; i < values.length; i++ ) {
+					expect( badValues( values[i] ) ).to.throw( TypeError );
+				}
+				socket.end();
+				done();
+			});
+
+			// Create a client socket connection:
+			socket
+				.host( ADDRESS.address )
+				.port( ADDRESS.port )
+				.strict( true )
+				.connect();
+
+			function badValues( value ) {
+				return function() {
+					socket.write( 'beep', value );
+				};
+			}
+		});
+
+		it( 'should not enforce type checking when not in strict mode', function test( done ) {
+			var socket = createSocket(),
+				values = [
+					5,
+					[],
+					{},
+					true,
+					null,
+					undefined,
+					NaN,
+					function(){}
+				];
+
+			// Configure the socket:
+			socket.on( 'connect', function onConnect() {
+				for ( var i = 0; i < values.length; i++ ) {
+					expect( badValues( values[i] ) ).to.not.throw( TypeError );
+				}
+				socket.end();
+				done();
+			});
+
+			// Create a client socket connection:
+			socket
+				.host( ADDRESS.address )
+				.port( ADDRESS.port )
+				.strict( false )
+				.connect();
+
+			function badValues( value ) {
+				return function() {
+					try {
+						socket.write( value );
+					} catch ( error ) {
+						// Expected behavior...
+						return;
+					}
+					throw new Error();
+				};
+			}
 		});
 
 		it( 'should write to the socket stream', function test( done ) {
@@ -175,13 +340,7 @@ describe( 'lib/socket', function tests() {
 			expected = 'put cpu.utilization ' + Date.now() + ' ' + Math.random() + ' beep=boop foo=bar\n';
 
 			// Configure the server:
-			SERVER.on( 'connection', function onSocket( sSocket ) {
-				sSocket.on( 'data', function onData( actual ) {
-					assert.strictEqual( actual.toString(), expected );
-					socket.end();
-					done();
-				});
-			});
+			SERVER.on( 'connection', onSocket );
 
 			// Configure the socket:
 			socket.on( 'connect', function onConnect() {
@@ -192,7 +351,40 @@ describe( 'lib/socket', function tests() {
 			socket
 				.host( ADDRESS.address )
 				.port( ADDRESS.port )
+				.strict( true )
 				.connect();
+
+			function onSocket( sSocket ) {
+				sSocket.on( 'data', function onData( actual ) {
+					assert.strictEqual( actual.toString(), expected );
+					SERVER.removeListener( 'connection', onSocket );
+					socket.end();
+					done();
+				});
+			}
+		});
+
+		it( 'should invoke a callback when finished writing to the socket', function test( done ) {
+			var socket = createSocket();
+
+			// Configure the socket:
+			socket.on( 'connect', function onConnect() {
+				socket.write( 'beep', onFinish );
+			});
+
+			// Create a client socket connection:
+			socket
+				.host( ADDRESS.address )
+				.port( ADDRESS.port )
+				.strict( true )
+				.connect();
+
+			function onFinish() {
+				console.log( arguments );
+				assert.ok( true );
+				socket.end();
+				done();
+			}
 		});
 
 	}); // end TESTS write()
@@ -226,6 +418,7 @@ describe( 'lib/socket', function tests() {
 			socket
 				.host( ADDRESS.address )
 				.port( ADDRESS.port )
+				.strict( true )
 				.connect();
 		});
 

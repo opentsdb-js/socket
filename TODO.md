@@ -5,7 +5,9 @@ TODO
 ### General
 
 1. 	Push data (Bixby)
-2. 	method to set type checking flag for `write`; default `true`
+2. 	
+3. 	event emitter note in README (events)
+4. 	example code
 
 
 
