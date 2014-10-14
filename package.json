@@ -4,7 +4,7 @@
   "description": "OpenTSDB socket client.",
   "author": {
     "name": "Athan Reines",
-    "email": "athan@nodeprime.com"
+    "email": "kgryte@gmail.com"
   },
   "contributors": [
     {}
