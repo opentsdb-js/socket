@@ -17,10 +17,10 @@
   "main": "./lib",
   "repository": {
     "type": "git",
-    "url": "git://github.com/opentsdb-js/opentsdb-socket.git"
+    "url": "git://github.com/opentsdb-js/socket.git"
   },
   "bugs": {
-    "url": "https://github.com/opentsdb-js/opentsdb-socket/issues"
+    "url": "https://github.com/opentsdb-js/socket/issues"
   },
   "keywords": [
     "opentsdb",

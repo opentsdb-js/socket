@@ -160,7 +160,7 @@ socket.addListener( 'warn', function onWarn( message ) {
 ```
 
 
----
+
 ## Notes
 
 When used as setters, all setter/getter methods are chainable. For example,
@@ -176,7 +176,7 @@ socket
 	.connect();
 ```
 
----
+
 ## Examples
 
 ``` javascript
@@ -247,7 +247,7 @@ function onWrite() {
 ```
 
 
----
+
 ## Tests
 
 ### Unit
@@ -276,7 +276,7 @@ $ make view-cov
 ```
 
 
----
+
 ## License
 
 [MIT license](http://opensource.org/licenses/MIT). 
@@ -291,17 +291,17 @@ Copyright &copy; 2014. Athan Reines.
 [npm-image]: http://img.shields.io/npm/v/opentsdb-socket.svg
 [npm-url]: https://npmjs.org/package/opentsdb-socket
 
-[travis-image]: http://img.shields.io/travis/opentsdb-js/opentsdb-socket/master.svg
-[travis-url]: https://travis-ci.org/opentsdb-js/opentsdb-socket
+[travis-image]: http://img.shields.io/travis/opentsdb-js/socket/master.svg
+[travis-url]: https://travis-ci.org/opentsdb-js/socket
 
-[coveralls-image]: https://img.shields.io/coveralls/opentsdb-js/opentsdb-socket/master.svg
-[coveralls-url]: https://coveralls.io/r/opentsdb-js/opentsdb-socket?branch=master
+[coveralls-image]: https://img.shields.io/coveralls/opentsdb-js/socket/master.svg
+[coveralls-url]: https://coveralls.io/r/opentsdb-js/socket?branch=master
 
-[dependencies-image]: http://img.shields.io/david/opentsdb-js/opentsdb-socket.svg
-[dependencies-url]: https://david-dm.org/opentsdb-js/opentsdb-socket
+[dependencies-image]: http://img.shields.io/david/opentsdb-js/socket.svg
+[dependencies-url]: https://david-dm.org/opentsdb-js/socket
 
-[dev-dependencies-image]: http://img.shields.io/david/dev/opentsdb-js/opentsdb-socket.svg
-[dev-dependencies-url]: https://david-dm.org/dev/opentsdb-js/opentsdb-socket
+[dev-dependencies-image]: http://img.shields.io/david/dev/opentsdb-js/socket.svg
+[dev-dependencies-url]: https://david-dm.org/dev/opentsdb-js/socket
 
-[github-issues-image]: http://img.shields.io/github/issues/opentsdb-js/opentsdb-socket.svg
-[github-issues-url]: https://github.com/opentsdb-js/opentsdb-socket/issues
+[github-issues-image]: http://img.shields.io/github/issues/opentsdb-js/socket.svg
+[github-issues-url]: https://github.com/opentsdb-js/socket/issues
