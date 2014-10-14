@@ -1,6 +1,6 @@
 {
   "name": "opentsdb-socket",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "OpenTSDB socket client.",
   "author": {
     "name": "Athan Reines",
